@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
+const cookieSession = require("cookie-session");
 
 const PORT = process.env.PORT || 8080;
 
@@ -9,7 +10,7 @@ const app = express();
 app.set("view engine", "ejs");
 
 // Models
-
+// Look at lib/users.js to see what this exports.
 const Users = require("./lib/users");
 
 // Middleware
@@ -31,10 +32,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// This middleware sets up our session cookie, which will be encrypted using the
+// provided key
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["this is my super secret key"]
+  })
+);
+
 // Add routes here
 
 app.get("/", (req, res) => {
-  res.render("home");
+  const userId = req.session.userId;
+  const user = Users.find(userId);
+
+  res.render("home", { user: user });
+});
+
+app.get("/users.json", (req, res) => {
+  res.json(Users.all());
 });
 
 // Register
@@ -44,7 +61,20 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  // TODO
+  const email = req.body.email;
+  const password = req.body.password;
+  const passwordConfirm = req.body.passwordConfirm;
+  console.log(req.body);
+
+  if (!email || !password || !passwordConfirm || password !== passwordConfirm) {
+    res.redirect("/register");
+    return;
+  }
+
+  const user = Users.register(email, password);
+  console.log("registered user", user);
+  req.session.userId = user.id;
+  res.redirect("/");
 });
 
 // Login
@@ -54,7 +84,27 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // TODO
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!email || !password) {
+    res.redirect("/login");
+    return;
+  }
+
+  const user = Users.login(email, password);
+
+  if (user) {
+    req.session.userId = user.id;
+    res.redirect("/");
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/");
 });
 
 // Boot server

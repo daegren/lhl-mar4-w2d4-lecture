@@ -2,6 +2,10 @@
 
 <div class="container">
   <h1>Home Page</h1>
+
+  <% if (user) { %>
+  <div>Hello, <%= user.email %></div>
+  <% } %>
 </div>
 
 <% include partials/_footer %>

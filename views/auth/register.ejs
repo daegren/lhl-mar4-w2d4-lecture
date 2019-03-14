@@ -2,6 +2,25 @@
 
 <div class="container">
   <h1>Register Account</h1>
+
+  <form action="/register" method="POST">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input class="form-control" type="email" placeholder="Enter your email address" name="email" />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input class="form-control" type="password" placeholder="Enter a password" name="password" />
+    </div>
+
+    <div class="form-group">
+      <label for="passwordConfirm">Password Confirmation:</label>
+      <input class="form-control" type="password" placeholder="Enter your password again" name="passwordConfirm" />
+    </div>
+
+    <input type="submit" class="btn btn-primary" value="Register" />
+  </form>
 </div>
 
 <% include ../partials/_footer %>
